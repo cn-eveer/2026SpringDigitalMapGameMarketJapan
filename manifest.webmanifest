@@ -1,10 +1,10 @@
 {
-  "name":"Event Hall Booth Map",
-  "short_name":"Booth Map",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#f1f5f9",
-  "theme_color":"#f1f5f9",
-  "description":"Offline event hall booth map"
+  "name": "ゲムマ2026春 デジタルマップ",
+  "short_name": "Booth Map",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#f1f5f9",
+  "description": "Game Market 2026 Springのブースナビゲーションマップ"
 }
