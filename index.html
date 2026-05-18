@@ -48,6 +48,16 @@
 #infoPanel .markBtns{display:inline-flex;gap:6px;margin-top:6px;margin-left:6px;width:calc(68% - 10px);vertical-align:top}
 #infoPanel .markBtns button{height:28px;font-size:11px}
 @media(max-width:430px){#infoPanel{padding:6px 8px}#infoPanel .panelHead{gap:6px}#infoPanel #panelTitle{font-size:15px}#infoPanel #panelSub{font-size:10px}#infoPanel .daySwitch{max-width:150px;margin:3px 0 4px 0}#infoPanel .daySwitch button{height:22px;font-size:10px}#infoPanel .boothInfo{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:5px;max-height:105px;font-size:11px;padding:5px}#infoPanel .boothInfo.empty{font-size:11px}#infoPanel .boothInfoItem{padding:5px}#infoPanel .boothInfoItem:first-child{padding-top:5px}#infoPanel .boothInfoName{font-size:12px}#infoPanel .boothInfoMeta,#infoPanel .boothInfo a{font-size:10px}#infoPanel #closeBtn{height:26px;font-size:10px}#infoPanel #starBtn{height:26px;font-size:10px;min-width:108px;width:34%;margin-top:5px}#infoPanel .markBtns{width:calc(66% - 9px);margin-left:5px;margin-top:5px;gap:5px}#infoPanel .markBtns button{height:26px;font-size:10px;padding:0 4px}}
+
+/* v88: desktop uses top-left info panel; offline-save UI removed */
+#downloadHtmlBtn,#offlineHint{display:none!important}
+@media (min-width:701px){
+  #infoPanel{left:10px;right:auto;top:calc(122px + env(safe-area-inset-top));bottom:auto;width:min(390px,calc(100vw - 20px));max-height:calc(100vh - 136px - env(safe-area-inset-top));box-shadow:0 10px 26px rgba(15,23,42,.16);border-radius:14px;overflow:hidden}
+  #infoPanel .panelHead{gap:8px}
+  #infoPanel .boothInfo{grid-template-columns:1fr;max-height:calc(100vh - 285px);font-size:12px}
+  #infoPanel #starBtn{width:100%;min-width:0}
+  #infoPanel .markBtns{width:100%;margin-left:0}
+}
 </style></head><body><div id="app">
 <svg id="mapSvg"><g id="viewport"><rect x="0" y="0" width="1860" height="1010" fill="#f8fafc"/>
 <rect x="16" y="92" width="420" height="773" fill="#ffffff" stroke="#9da3a6" stroke-width="2" />
@@ -2805,7 +2815,7 @@
 <text class="symbolText" x="1564.50" y="914.00" fill="#fff" text-anchor="middle" dominant-baseline="middle"><tspan x="1564.50" dy="0.00">♂</tspan></text>
 </g>
 <g id="markerLayer"></g></svg>
-<div class="controls"><div class="searchRow"><input id="searchInput" placeholder="ブース番号・サークル名を検索" autocomplete="off"><button id="clearSearchBtn" aria-label="検索をクリア" title="検索をクリア">×</button><button id="searchBtn">検索</button></div><div class="userRow"><span>名前</span><input id="userInput" autocomplete="off" placeholder="guest"></div></div><button id="resetBtn">全体を見る</button><button id="downloadHtmlBtn" type="button">オフライン保存</button><div id="offlineHint"><button id="offlineHintClose" type="button">×</button><div id="offlineHintText">保存準備中…</div></div><div id="suggestions"></div><aside id="panel" class="favPanel"><button id="favToggle" type="button"><span>お気に入り</span><span id="favCount">0件 ▾</span></button><div id="favBody"><div class="favTitle">お気に入りブースリスト</div><div id="favList"></div><div class="againTitle">もう一回行くリスト</div><div id="againList" class="againList"></div></div></aside><aside id="infoPanel"><div class="panelHead"><div><div id="panelTitle">ブース未選択</div><div id="panelSub"></div><div id="daySwitch" class="daySwitch"><button data-day="土" class="active">土 / 両</button></div><div id="panelInfo" class="boothInfo empty"></div></div><button id="closeBtn">閉じる</button></div><button id="starBtn">☆ お気に入りに追加</button><div class="markBtns"><button id="visitedBtn">○ 行った</button><button id="againBtn">! もう一回</button></div></aside><div class="version">selectable-pins-v87-offline-download-2026-05-19</div></div>
+<div class="controls"><div class="searchRow"><input id="searchInput" placeholder="ブース番号・サークル名を検索" autocomplete="off"><button id="clearSearchBtn" aria-label="検索をクリア" title="検索をクリア">×</button><button id="searchBtn">検索</button></div><div class="userRow"><span>名前</span><input id="userInput" autocomplete="off" placeholder="guest"></div></div><button id="resetBtn">全体を見る</button><div id="suggestions"></div><aside id="panel" class="favPanel"><button id="favToggle" type="button"><span>お気に入り</span><span id="favCount">0件 ▾</span></button><div id="favBody"><div class="favTitle">お気に入りブースリスト</div><div id="favList"></div><div class="againTitle">もう一回行くリスト</div><div id="againList" class="againList"></div></div></aside><aside id="infoPanel"><div class="panelHead"><div><div id="panelTitle">ブース未選択</div><div id="panelSub"></div><div id="daySwitch" class="daySwitch"><button data-day="土" class="active">土 / 両</button></div><div id="panelInfo" class="boothInfo empty"></div></div><button id="closeBtn">閉じる</button></div><button id="starBtn">☆ お気に入りに追加</button><div class="markBtns"><button id="visitedBtn">○ 行った</button><button id="againBtn">! もう一回</button></div></aside><div class="version">selectable-pins-v88-desktop-top-left-2026-05-19</div></div>
 <script>
 (function(){
 var MAP_W=1860, MAP_H=1010;
