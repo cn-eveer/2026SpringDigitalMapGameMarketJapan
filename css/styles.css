@@ -103,7 +103,7 @@
 #infoPanel .boothInfo.empty{display:block;padding:0;color:#64748b;background:transparent;font-size:12px;font-weight:800}
 #infoPanel .boothInfoItem{display:flex;gap:12px;align-items:center;border:0!important;border-radius:0;padding:0!important;margin:0 0 4px 0!important;background:transparent;min-width:0}
 #infoPanel .boothInfo a{display:inline-block;margin:0;color:#2563eb;text-decoration:none;font-weight:900;font-size:13px;line-height:1.3}
-#infoPanel .memoBox{margin-top:8px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding:8px}
+#infoPanel .memoBox{margin-top:8px;border-radius:10px;background:#fff;padding:8px}
 #infoPanel .infoActions{display:flex!important;gap:6px;margin-top:8px;width:100%}
 #infoPanel .infoActions button{flex:1 1 0!important;width:auto!important;min-width:0!important;max-width:none!important;height:32px;border:0;border-radius:10px;font-weight:900;padding:0 6px;font-size:12px;background:#e5e7eb;color:#0f172a;white-space:nowrap}
 #infoPanel .infoActions #starBtn{width:auto!important;min-width:0!important;margin:0!important;display:block!important}
@@ -295,7 +295,7 @@
 .infoTabs button.active{background:#111827;color:#fff;border-color:#111827}
 .tabPanel{display:none;min-height:0}
 .tabPanel.active{display:block}
-#infoPanel .memoBox{margin:0;border:1px solid #d7dee8;border-radius:12px;background:#fff;padding:8px}
+#infoPanel .memoBox{margin:0;border-radius:12px;background:#fff;padding:8px}
 #infoPanel .memoBox label{display:block;font-size:12px;font-weight:900;margin-bottom:6px;color:#334155}
 #infoPanel .memoBox textarea{width:100%;min-height:112px;resize:vertical;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;color:#0f172a;padding:10px;font-size:14px;line-height:1.35;outline:none}
 #infoPanel .memoSaved{font-size:10px;font-weight:900;color:#64748b;margin-top:5px}
@@ -876,5 +876,220 @@
   .suggestion small{
     font-size:10px!important;
     max-width:40%!important;
+  }
+}
+
+
+/* v104: remove user name row and make info panel usable on short phones */
+.userRow{
+  display:none!important;
+}
+
+.controls{
+  gap:0!important;
+}
+
+/* Keep the information panel itself non-scrollable, but allocate space more safely. */
+#infoPanel{
+  overflow:hidden!important;
+}
+
+#infoPanel.show{
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+#infoPanel .infoPanelInner{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* Keep overview compact so memo / game list remains visible. */
+#infoPanel .topOverview,
+#infoPanel #overviewPanel{
+  flex:0 0 auto!important;
+  overflow:visible!important;
+}
+
+#infoPanel .overviewText{
+  max-height:calc(1.4em * 3)!important;
+  line-height:1.4!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+
+/* Stable tab area; memo does not scroll, game list scrolls internally. */
+#infoPanel .tabPanel.active,
+#infoPanel #memoTab.active,
+#infoPanel #gamesTab.active{
+  flex:0 0 154px!important;
+  height:154px!important;
+  min-height:154px!important;
+  max-height:154px!important;
+  overflow:hidden!important;
+}
+
+#infoPanel #memoTab.active,
+#infoPanel #memoTab.active .memoBox{
+  overflow:hidden!important;
+}
+
+#infoPanel #memoTab.active .memoBox{
+  height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+#infoPanel #memoTab.active textarea{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  resize:none!important;
+}
+
+#infoPanel #gamesTab.active .gamesPanel{
+  height:100%!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+
+@media(max-width:430px){
+  #infoPanel{
+    max-height:min(52vh, calc(100dvh - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    bottom:calc(6px + env(safe-area-inset-bottom))!important;
+    padding:6px 8px!important;
+  }
+
+  #infoPanel .panelHead{
+    gap:6px!important;
+    margin-bottom:2px!important;
+  }
+
+  #infoPanel #panelTitle{
+    font-size:13px!important;
+    line-height:1.08!important;
+  }
+
+  #infoPanel #closeBtn{
+    width:26px!important;
+    min-width:26px!important;
+    height:26px!important;
+    padding:0!important;
+  }
+
+  #infoPanel .boothTopLinks{
+    margin:3px 0!important;
+    line-height:1.15!important;
+  }
+
+  #infoPanel .boothTopLinks a{
+    font-size:10px!important;
+    line-height:1.15!important;
+  }
+
+  #infoPanel .overviewHeading{
+    font-size:10px!important;
+    line-height:1.15!important;
+    margin-bottom:2px!important;
+  }
+
+  #infoPanel .overviewText{
+    font-size:10px!important;
+    line-height:1.35!important;
+    max-height:calc(1.35em * 3)!important;
+  }
+
+  #infoPanel .infoTabs{
+    margin-top:4px!important;
+    margin-bottom:4px!important;
+  }
+
+  #infoPanel .infoTabs button{
+    height:24px!important;
+    font-size:10px!important;
+  }
+
+  #infoPanel .tabPanel.active,
+  #infoPanel #memoTab.active,
+  #infoPanel #gamesTab.active{
+    flex-basis:126px!important;
+    height:126px!important;
+    min-height:126px!important;
+    max-height:126px!important;
+  }
+
+  #infoPanel .memoBox label{
+    font-size:10px!important;
+    line-height:1.1!important;
+    margin-bottom:3px!important;
+  }
+
+  #infoPanel .memoBox textarea{
+    font-size:12px!important;
+    line-height:1.3!important;
+  }
+
+  #infoPanel .memoSaved{
+    font-size:9px!important;
+    line-height:1.1!important;
+  }
+
+  #infoPanel .gameItem{
+    padding:5px!important;
+  }
+
+  #infoPanel .gameTitle{
+    font-size:11px!important;
+    line-height:1.15!important;
+  }
+
+  #infoPanel .gameMeta,
+  #infoPanel .gameDescription{
+    font-size:9px!important;
+    line-height:1.2!important;
+  }
+
+  #infoPanel #starBtn,
+  #infoPanel .markBtns button{
+    height:25px!important;
+    font-size:10px!important;
+  }
+}
+
+/* Very short phones: compress fixed sections so メモ / ゲーム一覧 remains usable. */
+@media(max-width:430px) and (max-height:700px){
+  #infoPanel{
+    max-height:min(56vh, calc(100dvh - 82px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))!important;
+    padding:5px 7px!important;
+  }
+
+  #infoPanel #panelTitle{
+    font-size:12px!important;
+  }
+
+  #infoPanel .overviewText{
+    max-height:calc(1.3em * 2)!important;
+    line-height:1.3!important;
+  }
+
+  #infoPanel .tabPanel.active,
+  #infoPanel #memoTab.active,
+  #infoPanel #gamesTab.active{
+    flex-basis:112px!important;
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
+  }
+
+  #infoPanel .boothTopLinks a{
+    font-size:9px!important;
+  }
+
+  #infoPanel .infoTabs button{
+    height:22px!important;
   }
 }
