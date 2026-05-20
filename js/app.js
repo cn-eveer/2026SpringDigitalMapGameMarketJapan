@@ -98,7 +98,55 @@ function drawMarkers(){
 }
 function clientToMap(x,y){return {x:(x-view.x)/view.zoom,y:(y-view.y)/view.zoom};}
 function pick(x,y){for(var i=booths.length-1;i>=0;i--){var b=booths[i]; if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return b;} return null;}
-function selectBooth(b,center){selected=b; if(infoPanel)infoPanel.className='show'; if(center)centerBooth(b); updatePanel(); drawMarkers();}
+function boothUrlValue(b){
+  if(!b)return '';
+  return String(cleanDisplay(b)||b.id||'').replace(/\s+/g,'').replace(/^\s+|\s+$/g,'');
+}
+function updateBoothUrl(b,replace){
+  if(!b||!window.history||!window.URLSearchParams)return;
+  try{
+    var url=new URL(window.location.href);
+    url.searchParams.set('booth',boothUrlValue(b));
+    var next=url.pathname+url.search+url.hash;
+    var current=window.location.pathname+window.location.search+window.location.hash;
+    if(next===current)return;
+    if(replace)window.history.replaceState({boothId:b.id},'',next);
+    else window.history.pushState({boothId:b.id},'',next);
+  }catch(e){}
+}
+function findBoothFromQueryValue(value){
+  var raw=String(value||'').replace(/^\s+|\s+$/g,'');
+  if(!raw)return null;
+  var normRaw=normalizeSearchText(raw);
+  var compactRaw=normalizeSearchText(raw.replace(/\s+/g,''));
+  for(var i=0;i<booths.length;i++){
+    var b=booths[i];
+    if(String(b.id)===raw)return b;
+    if(normalizeSearchText(boothUrlValue(b))===compactRaw)return b;
+    var parts=boothSearchParts(b);
+    for(var p=0;p<parts.length;p++){
+      var part=String(parts[p]||'');
+      if(normalizeSearchText(part)===normRaw || normalizeSearchText(part.replace(/\s+/g,''))===compactRaw)return b;
+    }
+  }
+  for(var j=0;j<booths.length;j++){
+    if(boothSearchHaystack(booths[j]).indexOf(normRaw)>=0 || boothSearchHaystack(booths[j]).indexOf(compactRaw)>=0)return booths[j];
+  }
+  return null;
+}
+function openBoothFromUrl(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    var v=params.get('booth');
+    if(!v)return false;
+    var b=findBoothFromQueryValue(v);
+    if(!b)return false;
+    selectBooth(b,true,true);
+    searchInput.value=boothSuggestionText(b);
+    return true;
+  }catch(e){return false;}
+}
+function selectBooth(b,center,replaceUrl){selected=b; if(infoPanel)infoPanel.className='show'; if(center)centerBooth(b); updatePanel(); drawMarkers(); updateBoothUrl(b,!!replaceUrl);}
 function centerBooth(b){var w=window.innerWidth||390,h=window.innerHeight||844; view.x=w*.58-b.pinX*view.zoom; view.y=h*.58-b.pinY*view.zoom; applyView();}
 
 function cleanInfoRowCode(row){
@@ -506,7 +554,16 @@ if(memoInput){memoInput.oninput=function(){if(!selected)return;setMemoFor(select
 suggestions.onclick=function(e){var n=e.target; while(n&&n!==suggestions&&!n.getAttribute('data-id'))n=n.parentNode; if(n&&n.getAttribute('data-id')){var b=findById(n.getAttribute('data-id')); if(b){searchInput.value=boothSuggestionText(b);suggestions.className='';selectBooth(b,true);}}};
 favList.onclick=function(e){var item=e.target; while(item&&item!==favList&&!item.getAttribute('data-id'))item=item.parentNode; if(!item)return; var id=item.getAttribute('data-id'); if(e.target.tagName==='BUTTON'){var ix=favorites.indexOf(id); if(ix>=0)favorites.splice(ix,1); saveFav(); updatePanel(); drawMarkers();}else{var b=findById(id); if(b)selectBooth(b,true);}}; if(againList){againList.onclick=function(e){var item=e.target; while(item&&item!==againList&&!item.getAttribute('data-id'))item=item.parentNode; if(!item)return; var id=item.getAttribute('data-id'); if(e.target.tagName==='BUTTON'){var ix=again.indexOf(id); if(ix>=0)again.splice(ix,1); saveMarks(); updatePanel(); drawMarkers();}else{var b=findById(id); if(b)selectBooth(b,true);}};}
 userName=norm(storageGet('eventHallCurrentUserName.v1','guest')); userInput.value=userName; loadFav(); userInput.onchange=function(){userName=norm(userInput.value); userInput.value=userName; storageSet('eventHallCurrentUserName.v1',userName); loadFav(); updatePanel(); drawMarkers();};
-window.onresize=resetView; resetView(); updatePanel();
+window.addEventListener('popstate',function(){
+  if(!openBoothFromUrl()){
+    selected=null;
+    if(infoPanel)infoPanel.className='';
+    if(searchInput)searchInput.value='';
+    updatePanel();
+    drawMarkers();
+  }
+});
+window.onresize=resetView; resetView(); updatePanel(); openBoothFromUrl();
 })();
 
 (function(){
