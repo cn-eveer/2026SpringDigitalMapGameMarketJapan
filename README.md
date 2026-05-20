@@ -1,251 +1,87 @@
-# Game Market Booth Navigator
+# ゲムマ2026春 デジタルマップ
 
-Interactive offline-first booth navigation map for Game Market.
+Split file structure:
 
-Designed for:
+```text
+index.html
+css/
+  styles.css
+js/
+  data.js
+  app.js
+```
 
-* **iPhone / iPad**
-* **Android**
-* **Desktop / PC**
-* **GitHub Pages hosting**
-* **Offline usage after first load**
+- `index.html` stays at the project root.
+- `css/styles.css` contains the extracted styles.
+- `js/data.js` contains map/data arrays and constants.
+- `js/app.js` contains the app behavior.
 
----
+Open `index.html` in a browser, or serve this folder with a local static server.
 
-## Features
 
-### Interactive Booth Map
+## Memo feature
 
-* Drag to move around the map
-* Pinch to zoom (canvas only)
-* Browser page zoom is disabled
-* Booths are selectable
+Each selected booth now has a free-text memo field in the information panel. Memos are automatically saved in `localStorage` per user name and booth ID.
 
-### Search
 
-Search by:
+## Memo-first booth information panel
 
-* Booth number
-  Example: `い39`
-* Booth code
-  Example: `C13`
-* Special booth
-  Example: `特設01`
-* Booth name
-  Example: `オインク`
+- The booth information panel title now shows the booth number and booth name together.
+- The memo field appears directly under the title and is saved automatically per booth and user.
+- Favorite / visited / revisit buttons appear directly under the memo field.
+- Booth detail metadata no longer repeats the booth number before the booth URL.
+- The user-specific favorite heading text was removed from the information panel.
 
-### Booth Information
 
-Shows:
+## Latest UI changes
 
-* Booth name
-* Booth location
-* Circle page
-* Game list
+- Info panel title now shows only `[ブース場所] [ブース名]`.
+- Close control is a compact `×` button aligned to the title row.
+- `ブースURL` and `ゲーム一覧` are always visible directly under the title.
+- Memo appears below the booth links and keeps autosaving per booth.
+- Action buttons are equal-width: `お気に入り`, `行った`, `もう一度`.
 
-### Favorites
 
-Users can:
+## v91 info panel tabs
 
-* Add favorite booths
-* Mark visited booths
-* Mark "もう一回行く"
-* Remove favorites
+- Added tabs inside the booth information panel: `メモ`, `概要`, `ゲーム一覧`.
+- `概要` is populated from `gamemarket_2026s_booths_only(1).csv`.
+- `ゲーム一覧` is populated from `gamemarket_2026s_games_only(1).csv`.
+- Memo text remains saved per booth and per user in localStorage.
 
-Favorites show:
+## Latest update
 
-* Booth name
-* Booth location
-* Visit status
+- `概要` is now shown directly below the booth title/link area with a fixed-height scroll box.
+- The info panel tabs are now `メモ`, `ゲーム一覧`, and `気になるリスト`.
+- Games can be marked as `気になる` from the game list.
+- Marking any game as `気になる` automatically adds that booth to `お気に入り`.
 
-Saved locally on device.
 
-### User Profile
+## Latest info-panel changes
 
-Default username:
+- Removed the `気になるリスト` tab inside the booth info panel.
+- Added `ブース概要` before the overview text.
+- Updated link labels:
+  - `最新のブース情報をチェック`
+  - `最新のゲーム一覧をチェック`
+- Game `気になる` buttons remain in `ゲーム一覧` and still automatically add the booth to favorites.
 
-`guest`
 
-Stored locally using browser storage.
+## Latest layout update
 
-### Offline Support
+- The info panel itself no longer scrolls vertically.
+- `ブース概要` stays visible below the title and links.
+- Only the active tab content scrolls when there is too much content.
 
-After first access, users can reopen the page even without internet.
+## Latest overview sizing update
 
-Works with:
+- Reduced the maximum height of `ブース概要`.
+- Long overview text now scrolls inside the `ブース概要` area instead of expanding the info panel.
+- The info panel itself remains non-scrolling vertically.
 
-* iPhone Safari
-* Android Chrome
-* Desktop browsers
 
----
+## v96
 
-# Mobile UI
-
-On mobile:
-
-* Booth information appears as **bottom panel**
-* Favorites are collapsible
-
-Optimized for:
-
-* One-hand use
-* Fullscreen map navigation
-
----
-
-# Desktop UI
-
-On desktop:
-
-* Booth information appears on **top-left panel**
-* Uses larger information layout
-
----
-
-# Data Support
-
-Supports:
-
-## Area Booths
-
-Example:
-
-* エリア01
-* エリア95
-
-## Special Booths
-
-Example:
-
-* 特設01
-* 特設12
-
-## Day-based Booths
-
-Supported formats:
-
-* 土 → Saturday only
-* 日 → Sunday only
-* 両 → Both days
-
-Current logic:
-
-* Sunday-only booths are excluded
-* Saturday + Both-day booths are shown
-
-Example:
-
-`土-い39 → い39`
-
----
-
-# Hosting on GitHub Pages
-
-## 1. Create repository
-
-Example:
-
-`gamemarket-map`
-
-## 2. Upload files
-
-Upload:
-
-* `index.html`
-
-## 3. Enable Pages
-
-Go to:
-
-`Settings → Pages`
-
-Set:
-
-* Source → Deploy from branch
-* Branch → main
-
-## 4. Open
-
-Your URL:
-
-`https://YOUR_USERNAME.github.io/gamemarket-map/`
-
----
-
-# Offline Installation
-
-## iPhone
-
-Safari:
-
-1. Open website
-2. Share
-3. Add to Home Screen
-
-## Android
-
-Chrome:
-
-1. Open website
-2. Menu
-3. Install app
-
-## Desktop
-
-Chrome / Edge:
-
-1. Open website
-2. Install icon in address bar
-
----
-
-# Storage
-
-Uses:
-
-`localStorage`
-
-Saved data:
-
-* Username
-* Favorites
-* Visited booths
-* Visit-again list
-
-No server required.
-
----
-
-# Tech Stack
-
-Built with:
-
-* HTML
-* CSS
-* Vanilla JavaScript
-* SVG
-
-No frameworks.
-
-No backend.
-
-Fully static.
-
----
-
-# Version
-
-Current:
-
-**v88**
-
----
-
-# License
-
-Personal / event usage.
-
-Modify freely.
-
----
+- ブース概要の本文エリアを3行分表示する高さに調整しました。
+- 3行を超える概要は、ブース概要内だけで縦スクロールします。
+- 情報パネル本体は引き続き縦スクロールしません。
