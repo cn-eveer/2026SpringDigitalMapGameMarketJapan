@@ -299,7 +299,7 @@
 #infoPanel .memoBox label{display:block;font-size:12px;font-weight:900;margin-bottom:6px;color:#334155}
 #infoPanel .memoBox textarea{width:100%;min-height:112px;resize:vertical;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;color:#0f172a;padding:10px;font-size:14px;line-height:1.35;outline:none}
 #infoPanel .memoSaved{font-size:10px;font-weight:900;color:#64748b;margin-top:5px}
-.overviewPanel,.gamesPanel{max-height:142px;border:1px solid #d7dee8;border-radius:12px;background:#fff;padding:9px;font-size:12px;line-height:1.45;color:#0f172a;white-space:pre-wrap}
+.overviewPanel,.gamesPanel{max-height:142px;overflow:auto;border:1px solid #d7dee8;border-radius:12px;background:#fff;padding:9px;font-size:12px;line-height:1.45;color:#0f172a;white-space:pre-wrap}
 .overviewPanel.empty,.gamesPanel.empty{color:#64748b;background:#f8fafc;white-space:normal}
 .gameItem{border-bottom:1px solid #e2e8f0;padding:7px 0;white-space:normal}
 .gameItem:first-child{padding-top:0}
@@ -624,31 +624,257 @@
   }
 }
 
-/* v100: ブース概要 compresses when short.
-   - 1–2 lines: natural height, no internal scroll.
-   - 3+ lines: max 3 visible lines, scroll only inside the overview text. */
-#infoPanel .topOverview{
+
+/* v100: ブース概要の外側はスクロールさせず、概要本文だけをスクロールする。
+   短い概要は自然な高さに圧縮し、長い概要は本文エリア内だけ最大3行でスクロール。 */
+#infoPanel .topOverview,
+#infoPanel #overviewPanel{
   flex:0 0 auto!important;
-  height:auto!important;
   min-height:0!important;
+  height:auto!important;
   max-height:none!important;
   overflow:visible!important;
 }
+
+#infoPanel .overviewHeading{
+  flex:0 0 auto!important;
+}
+
 #infoPanel .overviewText{
-  box-sizing:border-box!important;
   display:block!important;
-  height:auto!important;
   min-height:0!important;
+  height:auto!important;
   max-height:calc(1.45em * 3)!important;
+  line-height:1.45!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
 }
-#infoPanel .topOverview.empty,
-#infoPanel .overviewText:empty{
-  min-height:0!important;
-  max-height:0!important;
-  padding-top:0!important;
-  padding-bottom:0!important;
+
+#infoPanel .overviewPanel.empty .overviewText,
+#infoPanel .topOverview.empty .overviewText{
+  overflow-y:hidden!important;
+}
+
+
+/* v101: search mode switch for booth/game search */
+.searchModeRow{
+  display:flex;
+  gap:5px;
+  background:rgba(255,255,255,.9);
+  border:1px solid #d7dee8;
+  border-radius:12px;
+  box-shadow:0 4px 14px rgba(15,23,42,.10);
+  padding:4px;
+  width:100%;
+  min-width:0;
+}
+.searchModeRow button{
+  flex:1;
+  height:26px;
+  border:0;
+  border-radius:9px;
+  background:#e5e7eb;
+  color:#0f172a;
+  font-size:11px;
+  font-weight:900;
+}
+.searchModeRow button.active{
+  background:#111827;
+  color:#fff;
+}
+#suggestions .suggestion[data-result-type="game"] span::before{
+  content:"🎲 ";
+}
+#suggestions .suggestion[data-result-type="booth"] span::before{
+  content:"📍 ";
+}
+@media(max-width:430px){
+  .searchModeRow{
+    gap:4px;
+    padding:3px;
+    border-radius:10px;
+  }
+  .searchModeRow button{
+    height:23px;
+    font-size:10px;
+    border-radius:8px;
+  }
+}
+
+
+/* v102: search type dropdown inside search bar */
+.searchModeRow{
+  display:none!important;
+}
+.searchRow select#searchModeSelect{
+  flex:0 0 92px;
+  min-width:92px;
+  max-width:92px;
+  height:100%;
+  border:0;
+  outline:0;
+  border-radius:10px;
+  background:#e5e7eb;
+  color:#0f172a;
+  font-size:11px;
+  font-weight:900;
+  padding:0 20px 0 8px;
+  appearance:auto;
+}
+.searchRow select#searchModeSelect:focus{
+  box-shadow:0 0 0 2px rgba(17,24,39,.16) inset;
+}
+@media(max-width:430px){
+  .searchRow select#searchModeSelect{
+    flex-basis:82px;
+    min-width:82px;
+    max-width:82px;
+    font-size:10px;
+    padding-left:6px;
+  }
+}
+
+
+/* v103: larger, cleaner search dropdown and suggestion results */
+.searchRow{
+  height:46px!important;
+  gap:7px!important;
+  padding:6px!important;
+  border-radius:16px!important;
+}
+
+.searchRow select#searchModeSelect{
+  flex:0 0 112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  height:34px!important;
+  border:1px solid #cbd5e1!important;
+  border-radius:12px!important;
+  background:#f8fafc!important;
+  color:#0f172a!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  padding:0 10px!important;
+  cursor:pointer;
+}
+
+.searchRow select#searchModeSelect:focus{
+  border-color:#94a3b8!important;
+  box-shadow:0 0 0 3px rgba(15,23,42,.10)!important;
+}
+
+.searchRow input{
+  font-size:15px!important;
+  padding:0 9px!important;
+}
+
+.searchRow #clearSearchBtn{
+  min-width:32px!important;
+  width:32px!important;
+  height:32px!important;
+  border-radius:11px!important;
+  font-size:19px!important;
+}
+
+.searchRow button#searchBtn{
+  min-width:56px!important;
+  height:32px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  padding:0 10px!important;
+}
+
+#suggestions{
+  top:calc(62px + env(safe-area-inset-top))!important;
+  width:calc(100vw - 122px)!important;
+  max-width:360px!important;
+  max-height:230px!important;
+  border-radius:14px!important;
+  box-shadow:0 16px 36px rgba(15,23,42,.20)!important;
+}
+
+.suggestion{
+  min-height:48px!important;
+  padding:9px 11px!important;
+  align-items:center!important;
+  gap:10px!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+}
+
+.suggestion span{
+  flex:1 1 auto!important;
+  min-width:0!important;
   overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+.suggestion small{
+  flex:0 0 auto!important;
+  max-width:42%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:11px!important;
+  line-height:1.15!important;
+}
+
+@media(max-width:430px){
+  .searchRow{
+    height:44px!important;
+    gap:5px!important;
+    padding:5px!important;
+    border-radius:15px!important;
+  }
+
+  .searchRow select#searchModeSelect{
+    flex-basis:98px!important;
+    min-width:98px!important;
+    max-width:98px!important;
+    height:32px!important;
+    font-size:12px!important;
+    border-radius:11px!important;
+    padding:0 7px!important;
+  }
+
+  .searchRow input{
+    font-size:14px!important;
+    padding:0 7px!important;
+  }
+
+  .searchRow #clearSearchBtn{
+    min-width:30px!important;
+    width:30px!important;
+    height:30px!important;
+    font-size:18px!important;
+  }
+
+  .searchRow button#searchBtn{
+    min-width:50px!important;
+    height:30px!important;
+    font-size:12px!important;
+    padding:0 8px!important;
+  }
+
+  #suggestions{
+    top:calc(58px + env(safe-area-inset-top))!important;
+    width:calc(100vw - 16px)!important;
+    max-width:none!important;
+    max-height:220px!important;
+  }
+
+  .suggestion{
+    min-height:46px!important;
+    padding:8px 10px!important;
+    font-size:13px!important;
+  }
+
+  .suggestion small{
+    font-size:10px!important;
+    max-width:40%!important;
+  }
 }

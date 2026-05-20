@@ -4,9 +4,9 @@ var SPECIAL_BOOTHS=[{"id":"special-01","label":"特設01","display":"特設01","
 booths=booths.concat(SPECIAL_BOOTHS);
 var colors={"bg":"#f8fafc","wall":"#9da3a6","hall":"#ffffff","facility":"#f4f0e8","booth":"#efc247","trpg":"#d17142","purple":"#9a7aaa","green":"#b8c889","blue":"#c8d8ef","red":"#d80b21","border":"#111827","title":"#8e9499","pink":"#d0008b","cyan":"#079bd3","detail":"#374151"};
 var svg=document.getElementById('mapSvg'), viewport=document.getElementById('viewport'), pOverlayLayer=document.getElementById('pOverlayLayer'), markerLayer=document.getElementById('markerLayer'), toiletLayer=document.getElementById('toiletLayer');
-var searchInput=document.getElementById('searchInput'), searchBtn=document.getElementById('searchBtn'), clearSearchBtn=document.getElementById('clearSearchBtn'), suggestions=document.getElementById('suggestions'), resetBtn=document.getElementById('resetBtn');
+var searchInput=document.getElementById('searchInput'), searchBtn=document.getElementById('searchBtn'), clearSearchBtn=document.getElementById('clearSearchBtn'), searchModeSelect=document.getElementById('searchModeSelect'), suggestions=document.getElementById('suggestions'), resetBtn=document.getElementById('resetBtn');
 var userInput=document.getElementById('userInput'), panel=document.getElementById('panel'), infoPanel=document.getElementById('infoPanel'), favToggle=document.getElementById('favToggle'), favBody=document.getElementById('favBody'), favCount=document.getElementById('favCount'), panelTitle=document.getElementById('panelTitle'), panelSub=document.getElementById('panelSub'), panelInfo=document.getElementById('panelInfo'), panelLinks=document.getElementById('panelLinks'), infoTabs=document.getElementById('infoTabs'), memoTab=document.getElementById('memoTab'), overviewTab=document.getElementById('overviewTab'), gamesTab=document.getElementById('gamesTab'), overviewPanel=document.getElementById('overviewPanel'), gamesPanel=document.getElementById('gamesPanel'), watchTab=document.getElementById('watchTab'), watchPanel=document.getElementById('watchPanel'), memoInput=document.getElementById('memoInput'), memoSaved=document.getElementById('memoSaved'), daySwitch=document.getElementById('daySwitch'), starBtn=document.getElementById('starBtn'), visitedBtn=document.getElementById('visitedBtn'), againBtn=document.getElementById('againBtn'), favList=document.getElementById('favList'), againList=document.getElementById('againList'), closeBtn=document.getElementById('closeBtn');
-var selected=null, favorites=[], visited=[], again=[], memos={}, gameWatch={}, userName='guest', selectedDay='土', activeInfoTab='memo'; var view={zoom:.78,x:0,y:170}, drag=null, dragging=false, lastTouchDist=0, pinchStartZoom=0, pinchStartMap=null;
+var selected=null, favorites=[], visited=[], again=[], memos={}, gameWatch={}, userName='guest', selectedDay='土', activeInfoTab='memo', searchMode='booth'; var view={zoom:.78,x:0,y:170}, drag=null, dragging=false, lastTouchDist=0, pinchStartZoom=0, pinchStartMap=null;
 function isMobile(){return Math.min(window.innerWidth||0,window.innerHeight||0)<700;}
 function storageGet(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}}
 function storageSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
@@ -515,7 +515,12 @@ function boothSearchParts(b){
   if(!details.length)details=boothDetailsFor(b);
   for(var di=0;di<details.length;di++){add(details[di].name); add(details[di].place);}
   var games=gameDetailsFor(b);
-  for(var gi=0;gi<games.length;gi++){add(games[gi].title);}
+  for(var gi=0;gi<games.length;gi++){
+    add(games[gi].title);
+    add(games[gi].description);
+    add(games[gi].publisher);
+    add(games[gi].tags);
+  }
   return parts;
 }
 function boothSearchHaystack(b){
@@ -527,8 +532,149 @@ function boothSuggestionText(b){
   if(infos.length)return displayInfoPlace(infos[0].place)+' / '+infos[0].name;
   return cleanDisplay(b);
 }
-function showSuggestions(){var q=normalizeSearchText(searchInput.value); suggestions.innerHTML=''; if(!q){suggestions.className='';return;} var n=0; for(var i=0;i<booths.length&&n<30;i++){var b=booths[i]; if(boothSearchHaystack(b).indexOf(q)>=0){var btn=document.createElement('button'); btn.className='suggestion'; btn.setAttribute('data-id',b.id); btn.innerHTML='<span>'+escapeHtml(boothSuggestionText(b))+'</span><small>'+escapeHtml(cleanDisplay(b))+'</small>'; suggestions.appendChild(btn); n++;}} suggestions.className=n?'show':'';}
-function doSearch(){var q=normalizeSearchText(searchInput.value); if(!q)return; var b=null; for(var i=0;i<booths.length;i++){var x=booths[i]; var hx=boothSearchHaystack(x).split('|'); for(var k=0;k<hx.length;k++){if(hx[k]===q){b=x;break;}} if(b)break;} if(!b)for(var j=0;j<booths.length;j++){var y=booths[j]; if(boothSearchHaystack(y).indexOf(q)>=0){b=y;break;}} if(b){suggestions.className='';searchInput.value=boothSuggestionText(b);selectBooth(b,true);}}
+function gameSearchHaystack(g){
+  var parts=[];
+  function add(v){if(v!==undefined&&v!==null&&String(v)!=='')parts.push(String(v));}
+  add(g&&g.title);
+  add(g&&g.description);
+  add(g&&g.publisher);
+  add(g&&g.tags);
+  add(g&&g.price);
+  add(g&&g.players);
+  add(g&&g.time);
+  add(g&&g.age);
+  add(g&&g.place);
+  return parts.map(normalizeSearchText).join('|');
+}
+function gameSearchLabel(g){
+  return String((g&&g.title)||'無題').replace(/^\[|\]$/g,'');
+}
+function cssEscapeValue(v){
+  if(window.CSS&&CSS.escape)return CSS.escape(v);
+  return String(v).replace(/["\\]/g,'\\$&');
+}
+function searchGameResults(q,limit){
+  var results=[], seen={};
+  for(var i=0;i<booths.length;i++){
+    var b=booths[i];
+    var games=gameDetailsFor(b);
+    for(var gi=0;gi<games.length;gi++){
+      var g=games[gi];
+      var hay=gameSearchHaystack(g);
+      if(hay.indexOf(q)<0)continue;
+      var id=gameInterestId(b.id,g);
+      if(seen[id])continue;
+      seen[id]=1;
+      results.push({booth:b,game:g,exact:hay.split('|').indexOf(q)>=0});
+    }
+  }
+  results.sort(function(a,b){
+    if(a.exact!==b.exact)return a.exact?-1:1;
+    return gameSearchLabel(a.game).localeCompare(gameSearchLabel(b.game),'ja');
+  });
+  return results.slice(0,limit||30);
+}
+function selectGameResult(b,g){
+  if(!b)return;
+  suggestions.className='';
+  searchInput.value=g?gameSearchLabel(g):boothSuggestionText(b);
+  activeInfoTab='games';
+  selectBooth(b,true);
+  if(g&&gamesPanel){
+    setTimeout(function(){
+      try{
+        var gid=gameInterestId(b.id,g);
+        var el=gamesPanel.querySelector('[data-game-id="'+cssEscapeValue(gid)+'"]');
+        if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest'});
+      }catch(e){}
+    },0);
+  }
+}
+function updateSearchModeUi(){
+  if(searchInput){
+    searchInput.placeholder=searchMode==='game'?'ゲーム名・説明を検索':'ブース番号・サークル名を検索';
+  }
+  if(searchModeSelect)searchModeSelect.value=searchMode;
+}
+function setSearchMode(mode){
+  searchMode=(mode==='game')?'game':'booth';
+  updateSearchModeUi();
+  suggestions.className='';
+  suggestions.innerHTML='';
+  if(searchInput)searchInput.focus();
+}
+function showBoothSuggestions(q){
+  var n=0;
+  for(var i=0;i<booths.length&&n<30;i++){
+    var b=booths[i];
+    if(boothSearchHaystack(b).indexOf(q)>=0){
+      var btn=document.createElement('button');
+      btn.className='suggestion';
+      btn.setAttribute('data-id',b.id);
+      btn.setAttribute('data-result-type','booth');
+      btn.innerHTML='<span>'+escapeHtml(boothSuggestionText(b))+'</span><small>'+escapeHtml(cleanDisplay(b))+'</small>';
+      suggestions.appendChild(btn);
+      n++;
+    }
+  }
+  return n;
+}
+function showGameSuggestions(q){
+  var games=searchGameResults(q,30);
+  var n=0;
+  for(var i=0;i<games.length;i++){
+    var r=games[i];
+    var btn=document.createElement('button');
+    btn.className='suggestion';
+    btn.setAttribute('data-id',r.booth.id);
+    btn.setAttribute('data-result-type','game');
+    btn.setAttribute('data-game-key',gameInterestId(r.booth.id,r.game));
+    btn.innerHTML='<span>'+escapeHtml(gameSearchLabel(r.game))+'</span><small>'+escapeHtml(boothSuggestionText(r.booth))+'</small>';
+    suggestions.appendChild(btn);
+    n++;
+  }
+  return n;
+}
+function showSuggestions(){
+  var q=normalizeSearchText(searchInput.value);
+  suggestions.innerHTML='';
+  if(!q){suggestions.className='';return;}
+  var n=searchMode==='game'?showGameSuggestions(q):showBoothSuggestions(q);
+  suggestions.className=n?'show':'';
+}
+function findBoothSearchResult(q){
+  var b=null;
+  for(var i=0;i<booths.length;i++){
+    var x=booths[i];
+    var hx=boothSearchHaystack(x).split('|');
+    for(var k=0;k<hx.length;k++){if(hx[k]===q){b=x;break;}}
+    if(b)break;
+  }
+  if(!b){
+    for(var j=0;j<booths.length;j++){
+      var y=booths[j];
+      if(boothSearchHaystack(y).indexOf(q)>=0){b=y;break;}
+    }
+  }
+  return b;
+}
+function doSearch(){
+  var q=normalizeSearchText(searchInput.value);
+  if(!q)return;
+  if(searchMode==='game'){
+    var games=searchGameResults(q,1);
+    if(games.length){
+      selectGameResult(games[0].booth,games[0].game);
+    }
+    return;
+  }
+  var b=findBoothSearchResult(q);
+  if(b){
+    suggestions.className='';
+    searchInput.value=boothSuggestionText(b);
+    selectBooth(b,true);
+  }
+}
 svg.addEventListener('mousedown',function(e){drag={sx:e.clientX,sy:e.clientY,vx:view.x,vy:view.y};dragging=false;});
 window.addEventListener('mousemove',function(e){if(!drag)return;var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;if(Math.abs(dx)+Math.abs(dy)>5)dragging=true;if(dragging){view.x=drag.vx+dx;view.y=drag.vy+dy;applyView();}});
 window.addEventListener('mouseup',function(e){if(!drag)return;var was=dragging;drag=null;dragging=false;if(!was){var p=clientToMap(e.clientX,e.clientY),b=pick(p.x,p.y); if(b)selectBooth(b,false);}});
@@ -546,12 +692,12 @@ var uiEls=[document.querySelector('.controls'),resetBtn,suggestions,panel,infoPa
 for(var uiI=0;uiI<uiEls.length;uiI++){if(uiEls[uiI]){uiEls[uiI].addEventListener('mousedown',stopUi);uiEls[uiI].addEventListener('touchstart',stopUi,{passive:true});}}
 
 function clearSearch(){searchInput.value='';suggestions.className='';suggestions.innerHTML='';selected=null;if(infoPanel)infoPanel.className='';drawMarkers();searchInput.focus();}
-searchInput.oninput=showSuggestions; searchInput.onkeydown=function(e){if(e.key==='Enter')doSearch();}; searchBtn.onclick=doSearch; if(clearSearchBtn)clearSearchBtn.onclick=clearSearch; resetBtn.onclick=resetView; closeBtn.onclick=function(){if(infoPanel)infoPanel.className='';}; if(favToggle)favToggle.onclick=function(){if(!panel)return; if(panel.className.indexOf('open')>=0)panel.className='favPanel'; else panel.className='favPanel open'; updatePanel();}; if(daySwitch){daySwitch.onclick=function(e){var n=e.target; if(n&&n.getAttribute&&n.getAttribute('data-day')){selectedDay=n.getAttribute('data-day'); updatePanel();}};} starBtn.onclick=function(){if(!selected)return;var idx=favorites.indexOf(selected.id); if(idx>=0)favorites.splice(idx,1); else favorites.push(selected.id); saveFav(); updatePanel(); drawMarkers();}; visitedBtn.onclick=function(){if(!selected)return;toggleIn(visited,selected.id);saveMarks();updatePanel();drawMarkers();}; againBtn.onclick=function(){if(!selected)return;toggleIn(again,selected.id);saveMarks();updatePanel();drawMarkers();};
+searchInput.oninput=showSuggestions; searchInput.onkeydown=function(e){if(e.key==='Enter')doSearch();}; searchBtn.onclick=doSearch; if(searchModeSelect){searchModeSelect.onchange=function(){setSearchMode(searchModeSelect.value);};} if(clearSearchBtn)clearSearchBtn.onclick=clearSearch; resetBtn.onclick=resetView; closeBtn.onclick=function(){if(infoPanel)infoPanel.className='';}; if(favToggle)favToggle.onclick=function(){if(!panel)return; if(panel.className.indexOf('open')>=0)panel.className='favPanel'; else panel.className='favPanel open'; updatePanel();}; if(daySwitch){daySwitch.onclick=function(e){var n=e.target; if(n&&n.getAttribute&&n.getAttribute('data-day')){selectedDay=n.getAttribute('data-day'); updatePanel();}};} starBtn.onclick=function(){if(!selected)return;var idx=favorites.indexOf(selected.id); if(idx>=0)favorites.splice(idx,1); else favorites.push(selected.id); saveFav(); updatePanel(); drawMarkers();}; visitedBtn.onclick=function(){if(!selected)return;toggleIn(visited,selected.id);saveMarks();updatePanel();drawMarkers();}; againBtn.onclick=function(){if(!selected)return;toggleIn(again,selected.id);saveMarks();updatePanel();drawMarkers();};
 if(infoTabs){infoTabs.onclick=function(e){var n=e.target;if(n&&n.getAttribute&&n.getAttribute('data-tab'))activateInfoTab(n.getAttribute('data-tab'));};}
 if(gamesPanel){gamesPanel.onclick=function(e){var n=e.target;if(!n||!n.getAttribute||!n.getAttribute('data-game-id'))return;var gid=n.getAttribute('data-game-id');var games=gameDetailsFor(selected).filter(infoMatchesDay);if(!games.length)games=gameDetailsFor(selected);for(var i=0;i<games.length;i++){if(gameInterestId(selected.id,games[i])===gid){setGameWatched(selected.id,selected,games[i],!isGameWatched(selected.id,games[i]));updatePanel();drawMarkers();break;}}};}
 if(watchPanel){watchPanel.onclick=function(e){var n=e.target;if(!n||!n.getAttribute)return;var wid=n.getAttribute('data-watch-id');if(wid&&n.className.indexOf('watchRemoveBtn')>=0){delete gameWatch[wid];saveGameWatch();updatePanel();drawMarkers();return;}var item=n;while(item&&item!==watchPanel&&!item.getAttribute('data-booth-id'))item=item.parentNode;if(item&&item.getAttribute('data-booth-id')){var b=findById(item.getAttribute('data-booth-id'));if(b)selectBooth(b,true);}};}
 if(memoInput){memoInput.oninput=function(){if(!selected)return;setMemoFor(selected.id,memoInput.value);if(memoSaved){memoSaved.textContent='保存しました';clearTimeout(memoSaved._t);memoSaved._t=setTimeout(function(){if(memoSaved)memoSaved.textContent='入力すると自動保存されます';},1200);}};}
-suggestions.onclick=function(e){var n=e.target; while(n&&n!==suggestions&&!n.getAttribute('data-id'))n=n.parentNode; if(n&&n.getAttribute('data-id')){var b=findById(n.getAttribute('data-id')); if(b){searchInput.value=boothSuggestionText(b);suggestions.className='';selectBooth(b,true);}}};
+suggestions.onclick=function(e){var n=e.target; while(n&&n!==suggestions&&!n.getAttribute('data-id'))n=n.parentNode; if(n&&n.getAttribute('data-id')){var b=findById(n.getAttribute('data-id')); if(!b)return; var gameKey=n.getAttribute('data-game-key'); if(gameKey){var games=gameDetailsFor(b); for(var gi=0;gi<games.length;gi++){if(gameInterestId(b.id,games[gi])===gameKey){selectGameResult(b,games[gi]);return;}}} searchInput.value=boothSuggestionText(b);suggestions.className='';selectBooth(b,true);}};
 favList.onclick=function(e){var item=e.target; while(item&&item!==favList&&!item.getAttribute('data-id'))item=item.parentNode; if(!item)return; var id=item.getAttribute('data-id'); if(e.target.tagName==='BUTTON'){var ix=favorites.indexOf(id); if(ix>=0)favorites.splice(ix,1); saveFav(); updatePanel(); drawMarkers();}else{var b=findById(id); if(b)selectBooth(b,true);}}; if(againList){againList.onclick=function(e){var item=e.target; while(item&&item!==againList&&!item.getAttribute('data-id'))item=item.parentNode; if(!item)return; var id=item.getAttribute('data-id'); if(e.target.tagName==='BUTTON'){var ix=again.indexOf(id); if(ix>=0)again.splice(ix,1); saveMarks(); updatePanel(); drawMarkers();}else{var b=findById(id); if(b)selectBooth(b,true);}};}
 userName=norm(storageGet('eventHallCurrentUserName.v1','guest')); userInput.value=userName; loadFav(); userInput.onchange=function(){userName=norm(userInput.value); userInput.value=userName; storageSet('eventHallCurrentUserName.v1',userName); loadFav(); updatePanel(); drawMarkers();};
 window.addEventListener('popstate',function(){
@@ -563,7 +709,7 @@ window.addEventListener('popstate',function(){
     drawMarkers();
   }
 });
-window.onresize=resetView; resetView(); updatePanel(); openBoothFromUrl();
+window.onresize=resetView; resetView(); updatePanel(); updateSearchModeUi(); openBoothFromUrl();
 })();
 
 (function(){
