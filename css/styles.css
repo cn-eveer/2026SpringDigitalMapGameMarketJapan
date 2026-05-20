@@ -299,7 +299,7 @@
 #infoPanel .memoBox label{display:block;font-size:12px;font-weight:900;margin-bottom:6px;color:#334155}
 #infoPanel .memoBox textarea{width:100%;min-height:112px;resize:vertical;border:1px solid #cbd5e1;border-radius:12px;background:#f8fafc;color:#0f172a;padding:10px;font-size:14px;line-height:1.35;outline:none}
 #infoPanel .memoSaved{font-size:10px;font-weight:900;color:#64748b;margin-top:5px}
-.overviewPanel,.gamesPanel{max-height:142px;overflow:auto;border:1px solid #d7dee8;border-radius:12px;background:#fff;padding:9px;font-size:12px;line-height:1.45;color:#0f172a;white-space:pre-wrap}
+.overviewPanel,.gamesPanel{max-height:142px;border:1px solid #d7dee8;border-radius:12px;background:#fff;padding:9px;font-size:12px;line-height:1.45;color:#0f172a;white-space:pre-wrap}
 .overviewPanel.empty,.gamesPanel.empty{color:#64748b;background:#f8fafc;white-space:normal}
 .gameItem{border-bottom:1px solid #e2e8f0;padding:7px 0;white-space:normal}
 .gameItem:first-child{padding-top:0}
@@ -454,4 +454,201 @@
 }
 @media(max-width:430px){
   #infoPanel .topOverview{max-height:84px!important}
+}
+
+/* v97: keep ブース概要 height stable across tabs, especially ゲーム一覧 */
+#infoPanel .topOverview{
+  flex:0 0 auto!important;
+  min-height:calc((1.45em * 3) + 24px)!important;
+  max-height:calc((1.45em * 3) + 24px)!important;
+  overflow:hidden!important;
+}
+#infoPanel .overviewText{
+  min-height:calc(1.45em * 3)!important;
+  height:calc(1.45em * 3)!important;
+  max-height:calc(1.45em * 3)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+#infoPanel .tabPanel.active{
+  min-height:0!important;
+  overflow:auto!important;
+}
+#infoPanel .gamesPanel{
+  min-height:0!important;
+}
+@media(max-width:430px){
+  #infoPanel .topOverview{
+    min-height:calc((1.45em * 3) + 22px)!important;
+    max-height:calc((1.45em * 3) + 22px)!important;
+  }
+}
+
+/* v98: keep メモ / ゲーム一覧 tab area stable while letting ブース概要 compress.
+   ブース概要: natural height for short text, scroll inside at max 3 lines.
+   Tabs: same height for メモ and ゲーム一覧. */
+#infoPanel .topOverview{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:calc((1.45em * 3) + 25px)!important;
+  overflow:hidden!important;
+}
+#infoPanel .overviewText{
+  display:block!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:calc(1.45em * 3)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#infoPanel .tabPanel.active{
+  display:block!important;
+  flex:0 0 clamp(132px, 22vh, 190px)!important;
+  height:clamp(132px, 22vh, 190px)!important;
+  min-height:132px!important;
+  max-height:190px!important;
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active .memoBox{
+  height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active .memoBox textarea{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  resize:none!important;
+}
+#infoPanel #memoTab.active .memoSaved{
+  flex:0 0 auto!important;
+}
+#infoPanel #gamesTab.active .gamesPanel{
+  height:100%!important;
+  max-height:none!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+@media(max-width:430px){
+  #infoPanel .topOverview{
+    max-height:calc((1.45em * 3) + 23px)!important;
+  }
+  #infoPanel .tabPanel.active{
+    flex-basis:clamp(116px, 20vh, 160px)!important;
+    height:clamp(116px, 20vh, 160px)!important;
+    min-height:116px!important;
+    max-height:160px!important;
+  }
+}
+
+/* v99: make メモ and ゲーム一覧 tab panels exactly the same height.
+   メモ tab itself never scrolls; only ゲーム一覧 scrolls inside its list. */
+#infoPanel{
+  overflow:hidden!important;
+}
+#infoPanel.show{
+  display:flex!important;
+  flex-direction:column!important;
+}
+#infoPanel .infoPanelInner{
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  min-height:0!important;
+}
+#infoPanel .tabPanel,
+#infoPanel #memoTab,
+#infoPanel #gamesTab{
+  box-sizing:border-box!important;
+  width:100%!important;
+}
+#infoPanel .tabPanel.active,
+#infoPanel #memoTab.active,
+#infoPanel #gamesTab.active{
+  display:block!important;
+  flex:0 0 168px!important;
+  height:168px!important;
+  min-height:168px!important;
+  max-height:168px!important;
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active{
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active .memoBox{
+  box-sizing:border-box!important;
+  height:100%!important;
+  min-height:100%!important;
+  max-height:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active .memoBox textarea{
+  box-sizing:border-box!important;
+  flex:1 1 auto!important;
+  width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  resize:none!important;
+  overflow:hidden!important;
+}
+#infoPanel #memoTab.active .memoSaved{
+  flex:0 0 auto!important;
+}
+#infoPanel #gamesTab.active{
+  overflow:hidden!important;
+}
+#infoPanel #gamesTab.active .gamesPanel{
+  box-sizing:border-box!important;
+  height:100%!important;
+  min-height:100%!important;
+  max-height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+@media(max-width:430px){
+  #infoPanel .tabPanel.active,
+  #infoPanel #memoTab.active,
+  #infoPanel #gamesTab.active{
+    flex-basis:148px!important;
+    height:148px!important;
+    min-height:148px!important;
+    max-height:148px!important;
+  }
+}
+
+/* v100: ブース概要 compresses when short.
+   - 1–2 lines: natural height, no internal scroll.
+   - 3+ lines: max 3 visible lines, scroll only inside the overview text. */
+#infoPanel .topOverview{
+  flex:0 0 auto!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+#infoPanel .overviewText{
+  box-sizing:border-box!important;
+  display:block!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:calc(1.45em * 3)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#infoPanel .topOverview.empty,
+#infoPanel .overviewText:empty{
+  min-height:0!important;
+  max-height:0!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  overflow:hidden!important;
 }
